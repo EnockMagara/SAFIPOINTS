@@ -1,28 +1,25 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────
 # Deployment script — runs ON the droplet via GitHub Actions
-# Dockerized deployment: pull code → build images → restart
+# Images are pre-built in CI and pushed to ghcr.io
+# Server only pulls and restarts — no building on the droplet
 # ──────────────────────────────────────────────────────────────
 set -euo pipefail
 
 APP_DIR="/var/www/safipoints"
-REPO_URL="$1"
 
 cd "$APP_DIR"
 
-# Pull latest code
-if [ -d .git ]; then
-  git fetch origin main
-  git reset --hard origin/main
-else
-  git clone "$REPO_URL" .
-fi
+# Pull latest compose config
+git fetch origin main && git reset --hard origin/main
 
-# Build and restart containers (production only — no override file)
-docker compose -f docker-compose.yml build
+# Pull pre-built images from ghcr.io
+docker compose -f docker-compose.yml pull
+
+# Restart containers with new images (zero-downtime for unchanged services)
 docker compose -f docker-compose.yml up -d
 
 # Clean up dangling images
 docker image prune -f
 
-echo "✅ Docker deployment complete!"
+echo "✅ Deployment complete!"

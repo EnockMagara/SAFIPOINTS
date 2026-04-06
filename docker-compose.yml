@@ -14,7 +14,7 @@ services:
 
   # ─── Express API ────────────────────────────────────────────
   api:
-    build: ./server
+    image: ghcr.io/enockmagara/safipoints-api:latest
     restart: unless-stopped
     env_file: .env
     environment:
@@ -27,10 +27,7 @@ services:
 
   # ─── React Frontend ────────────────────────────────────────
   client:
-    build:
-      context: ./client
-      args:
-        - REACT_APP_API_URL=/api
+    image: ghcr.io/enockmagara/safipoints-client:latest
     restart: unless-stopped
 
   # ─── Nginx Reverse Proxy ───────────────────────────────────
