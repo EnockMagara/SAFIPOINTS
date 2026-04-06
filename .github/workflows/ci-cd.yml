@@ -8,8 +8,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_API: ghcr.io/${{ github.repository_owner }}/safipoints-api
-  IMAGE_CLIENT: ghcr.io/${{ github.repository_owner }}/safipoints-client
 
 jobs:
   # ────────────────── TEST ──────────────────
@@ -46,6 +44,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set image names (lowercase)
+        id: vars
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "image_api=ghcr.io/${OWNER}/safipoints-api" >> "$GITHUB_OUTPUT"
+          echo "image_client=ghcr.io/${OWNER}/safipoints-client" >> "$GITHUB_OUTPUT"
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -61,7 +66,7 @@ jobs:
         with:
           context: ./server
           push: true
-          tags: ${{ env.IMAGE_API }}:latest,${{ env.IMAGE_API }}:${{ github.sha }}
+          tags: ${{ steps.vars.outputs.image_api }}:latest,${{ steps.vars.outputs.image_api }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -70,7 +75,7 @@ jobs:
         with:
           context: ./client
           push: true
-          tags: ${{ env.IMAGE_CLIENT }}:latest,${{ env.IMAGE_CLIENT }}:${{ github.sha }}
+          tags: ${{ steps.vars.outputs.image_client }}:latest,${{ steps.vars.outputs.image_client }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
