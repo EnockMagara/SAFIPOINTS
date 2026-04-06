@@ -48,6 +48,7 @@ echo "============================================="
 echo "  SSL setup complete!"
 echo "  https://safipoints.com is now live"
 echo ""
+
 echo "  Auto-renewal: add this cron job (as deploy):"
 echo "  0 3 * * * cd $APP_DIR && docker compose run --rm certbot renew && docker compose exec nginx nginx -s reload"
 echo "============================================="
