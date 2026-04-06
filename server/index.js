@@ -1,4 +1,7 @@
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+// Load .env from project root (local dev) — silently skipped in Docker where
+// env vars are injected via docker-compose env_file.
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const express = require('express');
 const cors = require('cors');
