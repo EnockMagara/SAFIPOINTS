@@ -6,6 +6,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+ENV REACT_APP_API_URL=/api
 RUN npm run build
 
 # ── Stage 2: Serve with Nginx ────────────────────────────────
