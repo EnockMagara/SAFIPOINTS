@@ -157,16 +157,16 @@ export default function MerchantQR() {
             <h3 className="mq-info-title">How it works</h3>
             <div className="mq-steps">
               {[
-                { num: '1', icon: '📱', title: 'Customer scans QR code', desc: 'Place the QR code on tables, at the counter, or on printed materials.' },
-                { num: '2', icon: '🍽️', title: 'Browse menu & order', desc: 'They see your full menu, add items to cart, and place their order.' },
-                { num: '3', icon: '💳', title: 'Pay at checkout', desc: 'Customer pays for their order through the payment flow.' },
+                { num: '1', icon: null, title: 'Customer scans QR code', desc: 'Place the QR code on tables, at the counter, or on printed materials.' },
+                { num: '2', icon: null, title: 'Browse menu & order', desc: 'They see your full menu, add items to cart, and place their order.' },
+                { num: '3', icon: null, title: 'Pay at checkout', desc: 'Customer pays for their order through the payment flow.' },
                 { num: '4', icon: '✦', title: 'Earn SAFI cashback', desc: 'They automatically earn SAFI rewards on every purchase.' },
               ].map((step, i) => (
                 <div key={i} className="mq-step">
                   <div className="mq-step-num">{step.num}</div>
                   <div className="mq-step-body">
                     <div className="mq-step-title">
-                      <span className="mq-step-icon">{step.icon}</span>
+                      {step.icon && <span className="mq-step-icon">{step.icon}</span>}
                       {step.title}
                     </div>
                     <p className="mq-step-desc">{step.desc}</p>

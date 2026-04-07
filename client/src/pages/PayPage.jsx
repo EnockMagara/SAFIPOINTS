@@ -81,7 +81,7 @@ export default function PayPage() {
     };
     fetchDiscount();
     return () => { cancelled = true; };
-  }, [useSafi, canUseSafi, order, merchant, state]);
+  }, [useSafi, canUseSafi, order, merchant, customerPhone]);
 
   const effectiveTotal = discountPreview?.available
     ? Math.max(0, order.total - discountPreview.discountAmount)
