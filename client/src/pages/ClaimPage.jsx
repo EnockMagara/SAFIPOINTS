@@ -11,6 +11,13 @@ export default function ClaimPage() {
   const [loadError, setLoadError] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+
+  // Auto-fill OTP in demo mode
+  useEffect(() => {
+    if (claimInfo?.prototypeClaimMode && !otp) {
+      setOtp('123456');
+    }
+  }, [claimInfo]); // eslint-disable-line react-hooks/exhaustive-deps
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState('');

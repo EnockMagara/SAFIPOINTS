@@ -5,25 +5,27 @@ import api from '../api/client';
 
 const PAYMENT_METHODS = [
   {
-    id: 'mpesa',
-    label: 'M-Pesa',
-    sublabel: 'Safaricom Mobile Money',
-    icon: '📱',
-    color: '#4CAF50',
-  },
-  {
-    id: 'card',
-    label: 'Debit / Credit Card',
-    sublabel: 'Visa · Mastercard · Amex',
-    icon: '💳',
-    color: '#1A56DB',
-  },
-  {
     id: 'cash',
     label: 'Cash',
     sublabel: 'Pay at the counter',
     icon: '💵',
     color: '#6B7280',
+  },
+  {
+    id: 'mpesa',
+    label: 'M-Pesa',
+    sublabel: 'Coming soon',
+    icon: '📱',
+    color: '#4CAF50',
+    disabled: true,
+  },
+  {
+    id: 'card',
+    label: 'Debit / Credit Card',
+    sublabel: 'Coming soon',
+    icon: '💳',
+    color: '#1A56DB',
+    disabled: true,
   },
 ];
 
@@ -254,8 +256,10 @@ export default function PayPage() {
                 {PAYMENT_METHODS.map((m) => (
                   <button
                     key={m.id}
-                    className={`pp-method ${selected === m.id ? 'pp-method--active' : ''}`}
-                    onClick={() => setSelected(m.id)}
+                    className={`pp-method ${selected === m.id ? 'pp-method--active' : ''} ${m.disabled ? 'pp-method--disabled' : ''}`}
+                    onClick={() => !m.disabled && setSelected(m.id)}
+                    disabled={m.disabled}
+                    aria-disabled={m.disabled}
                   >
                     <div className="pp-method-icon-wrap" style={{ '--method-color': m.color }}>
                       <span className="pp-method-icon">{m.icon}</span>

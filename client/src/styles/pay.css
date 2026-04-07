@@ -67,6 +67,9 @@
 .pp-methods-label { font-size: 11px; font-weight: 700; color: #8B7E6E; text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 14px; }
 .pp-method { display: flex; align-items: center; gap: 16px; width: 100%; padding: 14px 16px; border: 1.5px solid #E8E3DB; border-radius: 16px; background: #FFFFFF; cursor: pointer; transition: all 0.2s; margin-bottom: 10px; text-align: left; font-family: var(--font); }
 .pp-method:hover { border-color: rgba(239,191,74,0.5); background: #FFFDF7; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+.pp-method--disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.pp-method--disabled:hover { border-color: #E8E3DB; background: #FFFFFF; transform: none; box-shadow: none; }
+.pp-method--disabled .pp-method-sub { font-style: italic; }
 .pp-method--active { border-color: var(--gold); background: linear-gradient(145deg, #FFFDF7, #FFFBF0); box-shadow: 0 0 0 3px rgba(239,191,74,0.1), 0 4px 12px rgba(0,0,0,0.04); transform: translateY(-1px); }
 .pp-method-icon-wrap { width: 44px; height: 44px; border-radius: 12px; background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.04); }
 .pp-method--active .pp-method-icon-wrap { background: rgba(239,191,74,0.08); border-color: rgba(239,191,74,0.2); }
