@@ -96,6 +96,9 @@ jobs:
             cd /var/www/safipoints
             git fetch origin main && git reset --hard origin/main
 
+            # ── Remove dev override so it never interferes with production ──
+            rm -f docker-compose.override.yml
+
             # ── Pre-deploy disk check ──
             DISK_PCT=$(df / --output=pcent | tail -1 | tr -dc '0-9')
             if [ "$DISK_PCT" -gt 85 ]; then
