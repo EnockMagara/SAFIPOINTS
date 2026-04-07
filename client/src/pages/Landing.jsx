@@ -2,17 +2,17 @@ import { Link } from 'react-router-dom';
 
 const features = [
   {
-    icon: '⛓️',
+    icon: '✦',
     title: 'Trusted Record of Rewards',
     text: 'Every reward earned and redeemed is recorded with a clear audit trail, improving confidence for both customers and management.',
   },
   {
-    icon: '⚡',
+    icon: '→',
     title: 'Immediate Customer Value',
     text: 'Guests receive rewards at checkout without extra steps, helping increase satisfaction and repeat visits.',
   },
   {
-    icon: '🔄',
+    icon: '↻',
     title: 'Simple Redemption Experience',
     text: 'Customers apply rewards instantly at the point of sale, while your team keeps full visibility into program activity.',
   },
