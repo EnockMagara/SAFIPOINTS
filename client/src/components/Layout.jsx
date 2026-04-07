@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../styles/layout.css';
 
 const merchantNav = [
   { path: '/dashboard', label: 'Dashboard', icon: '◎' },
@@ -22,164 +21,97 @@ export default function Layout({ children }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Close sidebar on route change (mobile nav tap)
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
+  // Close sidebar on route change
+  useEffect(() => { closeSidebar(); }, [location.pathname, closeSidebar]);
+
+  // Lock body scroll when sidebar is open on mobile
   useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
 
   const handleLogout = () => { logout(); navigate('/'); };
   const navItems = isMerchant ? merchantNav : customerNav;
 
   return (
     <div className="sp-layout">
-      {/* ── Mobile Overlay ───────────────────────────── */}
+      {/* ── Overlay ──────────────────────────────────── */}
       <div
         className={`sp-sidebar-overlay${sidebarOpen ? ' open' : ''}`}
-        onClick={() => setSidebarOpen(false)}
+        onClick={closeSidebar}
+        aria-hidden="true"
       />
 
       {/* ── Sidebar ──────────────────────────────────── */}
       <aside className={`sp-sidebar${sidebarOpen ? ' open' : ''}`}>
-        {/* Logo + Close */}
-        <div style={{
-          padding: '28px 24px 20px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-        }}>
+        <div className="sp-sidebar-header">
           <div>
-            <Link to={isMerchant ? '/dashboard' : '/wallet'} style={{
-              textDecoration: 'none',
-              fontWeight: 800,
-              fontSize: 18,
-              letterSpacing: '-0.02em',
-              background: 'linear-gradient(135deg, #EFBF4A, #F5D07A)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>
+            <Link to={isMerchant ? '/dashboard' : '/wallet'} className="sp-sidebar-logo">
               SafiPoints
             </Link>
-            <div style={{
-              fontSize: 11,
-              color: 'rgba(255,255,255,0.25)',
-              marginTop: 4,
-              fontWeight: 500,
-            }}>
+            <div className="sp-sidebar-subtitle">
               {isMerchant ? 'Business Console' : 'Customer Rewards'}
             </div>
           </div>
-          <button
-            className="sp-sidebar-close"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close menu"
-          >
+          <button className="sp-sidebar-close" onClick={closeSidebar} aria-label="Close menu">
             ✕
           </button>
         </div>
 
-        {/* Nav Items */}
-        <nav style={{ padding: '16px 12px', flex: 1 }}>
-          <div style={{
-            fontSize: 10, fontWeight: 700, letterSpacing: '0.12em',
-            color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase',
-            padding: '0 12px', marginBottom: 8,
-          }}>
-            Workspace
-          </div>
+        <nav className="sp-sidebar-nav">
+          <div className="sp-sidebar-nav-label">Workspace</div>
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
-              <Link key={item.path} to={item.path} style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '11px 14px',
-                borderRadius: 8,
-                fontSize: 14,
-                fontWeight: isActive ? 600 : 500,
-                textDecoration: 'none',
-                color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.45)',
-                background: isActive ? 'rgba(239, 191, 74, 0.1)' : 'transparent',
-                transition: 'all 0.15s',
-                marginBottom: 2,
-              }}>
-                <span style={{
-                  fontSize: 15,
-                  opacity: isActive ? 1 : 0.5,
-                  color: isActive ? '#EFBF4A' : 'inherit',
-                }}>
-                  {item.icon}
-                </span>
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`sp-sidebar-link${isActive ? ' active' : ''}`}
+              >
+                <span className="sp-sidebar-link-icon">{item.icon}</span>
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* User Block */}
-        <div style={{
-          padding: '16px 16px 20px',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: 10,
-              background: 'linear-gradient(135deg, #EFBF4A, #F5D07A)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 800, color: '#0F1524',
-            }}>
+        <div className="sp-sidebar-user">
+          <div className="sp-sidebar-user-info">
+            <div className="sp-sidebar-avatar">
               {(user?.name || user?.email || '?')[0].toUpperCase()}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)',
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>
-                {user?.name || user?.email}
-              </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
+              <div className="sp-sidebar-user-name">{user?.name || user?.email}</div>
+              <div className="sp-sidebar-user-role">
                 {isMerchant ? 'Business Manager' : user?.tier?.toUpperCase() || 'MEMBER'}
               </div>
             </div>
           </div>
-          <button onClick={handleLogout} style={{
-            width: '100%', padding: '8px', borderRadius: 6,
-            fontSize: 12, fontWeight: 600,
-            color: 'rgba(255,255,255,0.35)',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            cursor: 'pointer',
-            transition: 'all 0.15s',
-          }}>
-            Sign Out
-          </button>
+          <button onClick={handleLogout} className="sp-sidebar-logout">Sign Out</button>
         </div>
       </aside>
 
       {/* ── Main Content ─────────────────────────────── */}
       <main className="sp-main">
-        {/* Top Bar */}
         <div className="sp-topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button
-              className="sp-hamburger"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open menu"
-            >
-              <div className="sp-hamburger-icon">
-                <span />
-                <span />
-                <span />
+          <div className="sp-topbar-left">
+            <button className="sp-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
+              <div className="sp-hamburger-lines">
+                <span /><span /><span />
               </div>
             </button>
-            <div style={{ fontSize: 13, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+            <div className="sp-topbar-label">
               {isMerchant ? 'Business Workspace' : 'Customer Workspace'} · SafiPoints
             </div>
           </div>
-          <a href="https://testnet.xrpl.org" target="_blank" rel="noreferrer" style={{
-            fontSize: 12, color: 'var(--gold)', textDecoration: 'none',
-            fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4,
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
+          <a href="https://testnet.xrpl.org" target="_blank" rel="noreferrer" className="sp-topbar-xrpl">
+            <span className="sp-topbar-xrpl-dot" />
             Verification Network
           </a>
         </div>

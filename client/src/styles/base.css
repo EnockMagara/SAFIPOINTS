@@ -328,8 +328,22 @@ body {
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 640px) {
   .sp-wallet-balance { font-size: 36px; }
-  .sp-stat-grid { grid-template-columns: 1fr 1fr; }
+  .sp-wallet-card { padding: 24px 20px; }
+  .sp-stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sp-stat-card { padding: 16px; }
   .sp-stat-value { font-size: 22px; }
-  .sp-page-title { font-size: 22px; }
+  .sp-stat-label { font-size: 11px; }
+  .sp-page-title { font-size: 22px; margin-bottom: 18px; }
   .sp-features { grid-template-columns: 1fr; }
+  .sp-card { padding: 18px; }
+  .sp-redeem-code { font-size: 28px; letter-spacing: 6px; padding: 20px 16px; }
+  .sp-tx-row { flex-wrap: wrap; gap: 8px; padding: 14px 0; }
+  .sp-tx-row:hover { margin: 0; padding: 14px 0; }
+  .sp-form-row { flex-direction: column; gap: 0; }
+}
+
+@media (max-width: 380px) {
+  .sp-stat-grid { grid-template-columns: 1fr; }
+  .sp-wallet-balance { font-size: 30px; }
+  .sp-redeem-code { font-size: 22px; letter-spacing: 4px; padding: 16px 12px; }
 }
