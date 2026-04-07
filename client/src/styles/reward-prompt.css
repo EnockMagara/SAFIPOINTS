@@ -290,3 +290,66 @@
   background: currentColor;
   opacity: 0.4;
 }
+
+/* ── Auto-minted success variants ─────────────────────────── */
+.rp-header--success {
+  background: linear-gradient(160deg, #064e3b 0%, #065f46 100%);
+}
+.rp-header--success::before {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 65%);
+}
+.rp-header-icon--success {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.25);
+}
+
+.rp-amount-card--success {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.rp-amount-card--success::before {
+  background: radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 60%);
+}
+.rp-amount-card--success .rp-amount-safi {
+  color: #34d399;
+}
+
+.rp-benefit-icon--success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04));
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.rp-cta-primary--success {
+  background: #10b981;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+.rp-cta-primary--success:hover {
+  background: #34d399;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+/* ── XRPL transaction link ────────────────────────────────── */
+.rp-tx-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 20px 0;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  color: #10b981;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.rp-tx-link:hover {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+}

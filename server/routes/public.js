@@ -6,6 +6,10 @@ const PendingPoints = require('../models/PendingPoints');
 const LoyaltyService = require('../services/LoyaltyService');
 const SafiSendBridge = require('../services/SafiSendBridge');
 
+const Customer = require('../models/Customer');
+const Merchant = require('../models/Merchant');
+const TokenService = require('../services/TokenService');
+
 const router = express.Router();
 
 /**
@@ -151,33 +155,61 @@ router.post('/order/:id/pay', async (req, res, next) => {
     const safiAmount = LoyaltyService.calculateEarn(order.total, merchant.earnRate, tier);
     const earnRate = merchant.earnRate;
 
-    // Create PendingPoints (V2 soft-account model — no wallet yet)
-    let pending = null;
-    try {
-      pending = await PendingPoints.create({
-        phone: order.customerPhone,
-        merchant: merchant._id,
-        safiAmount,
-        fiatAmount: order.total,
-        earnRate,
-        orderId: order._id.toString(),
-      });
-      order.safiEarned = safiAmount;
-      order.pendingPointsId = pending._id;
+    // Check if customer already has an XRPL wallet with this merchant's trust line
+    const existingCustomer = await Customer.findOne({ phone: order.customerPhone }).select('+xrplSeedEnc');
+    const isEnrolled = existingCustomer?.xrplAddress && existingCustomer?.trustLineSet
+      && existingCustomer.enrolledMerchants?.map(String).includes(String(merchant._id));
 
-      // Generate OTP and store it on the PendingPoints record so the claim flow works
-      await SafiSendBridge.sendClaimSMS({
-        phone: order.customerPhone,
-        safiAmount,
-        merchantName: merchant.name,
-        pendingId: pending._id,
-      });
-    } catch (err) {
-      if (err.code === 11000) {
-        // Idempotent — already earned for this order
-        pending = await PendingPoints.findOne({ orderId: order._id.toString(), merchant: merchant._id });
-        order.safiEarned = pending?.safiAmount || safiAmount;
-      } else throw err;
+    let pending = null;
+    let autoMinted = false;
+    let mintResult = null;
+
+    if (isEnrolled) {
+      // ── Fast path: customer has wallet → mint directly on XRPL ──
+      try {
+        const fullMerchant = await Merchant.findById(merchant._id).select('+xrplSeedEnc');
+        mintResult = await TokenService.issueTokens({
+          merchant: fullMerchant,
+          customer: existingCustomer,
+          amount: safiAmount,
+          fiatAmount: order.total,
+          metadata: { source: 'auto-earn', orderId: order._id.toString() },
+        });
+        autoMinted = true;
+        order.safiEarned = safiAmount;
+      } catch (err) {
+        // If auto-mint fails, fall back to pending flow
+        console.error('[AUTO-MINT] Failed, falling back to pending:', err.message);
+        autoMinted = false;
+      }
+    }
+
+    if (!autoMinted) {
+      // ── Standard path: create PendingPoints + send claim SMS ──
+      try {
+        pending = await PendingPoints.create({
+          phone: order.customerPhone,
+          merchant: merchant._id,
+          safiAmount,
+          fiatAmount: order.total,
+          earnRate,
+          orderId: order._id.toString(),
+        });
+        order.safiEarned = safiAmount;
+        order.pendingPointsId = pending._id;
+
+        await SafiSendBridge.sendClaimSMS({
+          phone: order.customerPhone,
+          safiAmount,
+          merchantName: merchant.name,
+          pendingId: pending._id,
+        });
+      } catch (err) {
+        if (err.code === 11000) {
+          pending = await PendingPoints.findOne({ orderId: order._id.toString(), merchant: merchant._id });
+          order.safiEarned = pending?.safiAmount || safiAmount;
+        } else throw err;
+      }
     }
 
     await order.save();
@@ -199,7 +231,10 @@ router.post('/order/:id/pay', async (req, res, next) => {
         kshCashback: (safiAmount * earnRate).toFixed(2),
         earnRate,
         merchantName: merchant.name,
-        pendingId: pending?._id,
+        autoMinted,
+        xrplTxHash: mintResult?.xrplTxHash || null,
+        newBalance: mintResult?.newBalance || null,
+        pendingId: pending?._id || null,
         claimWindowDays: 180,
         expiryDays: 365,
       },

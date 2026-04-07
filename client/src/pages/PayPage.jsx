@@ -149,7 +149,14 @@ export default function PayPage() {
         <div className="pp-summary">
           <div className="pp-summary-top">
             <span className="pp-summary-label">Order {order.orderNumber}</span>
-            <span className="pp-summary-total">KES {order.total?.toLocaleString()}</span>
+            <div className="pp-summary-total-wrap">
+              {useSafi && discountPreview?.available && (
+                <span className="pp-summary-original">KES {order.total?.toLocaleString()}</span>
+              )}
+              <span className="pp-summary-total">
+                KES {(effectiveTotal ?? order.total)?.toLocaleString()}
+              </span>
+            </div>
           </div>
           <div className="pp-summary-divider" />
           <div className="pp-summary-items">

@@ -8,25 +8,29 @@ import {
   RiStoreLine,
   RiTimeLine,
   RiLockLine,
+  RiCheckboxCircleLine,
+  RiExternalLinkLine,
 } from 'react-icons/ri';
 
 /**
- * RewardPrompt — "You earned SAFI!" popup.
+ * RewardPrompt — adaptive "You earned SAFI!" popup.
  *
- * Two-step flow:
- *   1. celebrate — show the amount earned
- *   2. invite    — explain benefits + sign-up CTA
+ * Three modes based on reward.autoMinted:
+ *   1. autoMinted=true  → Points are already in wallet. Celebrate + show balance.
+ *   2. autoMinted=false  → New/unclaimed customer. Two-step claim flow.
  *
  * Props:
- *   reward         — { safiEarned, kshCashback, merchantName, pendingId }
- *   onDismiss      — called when user taps "Maybe later"
- *   onSignUp       — called when user taps "Claim cashback"
+ *   reward         — { safiEarned, kshCashback, merchantName, pendingId, autoMinted, xrplTxHash, newBalance }
+ *   onDismiss      — called when user taps dismiss
+ *   onSignUp       — called when user taps claim CTA (only for pending flow)
  *   autoShowDelay  — ms before popup appears (default 1500)
  */
 export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDelay = 1500 }) {
   const [visible, setVisible] = useState(false);
   const [step, setStep]       = useState('celebrate'); // 'celebrate' | 'invite'
   const navigate = useNavigate();
+
+  const isAutoMinted = reward?.autoMinted === true;
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), autoShowDelay);
@@ -50,7 +54,7 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
 
   if (!reward) return null;
 
-  const benefits = [
+  const pendingBenefits = [
     {
       icon: <RiCoinLine size={18} />,
       title: 'Yours to keep',
@@ -65,6 +69,24 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
       icon: <RiTimeLine size={18} />,
       title: '6 months to claim',
       desc:  'After that your cashback expires',
+    },
+  ];
+
+  const mintedBenefits = [
+    {
+      icon: <RiCheckboxCircleLine size={18} />,
+      title: 'Added to your wallet',
+      desc:  'Points are live on XRPL — ready to spend',
+    },
+    {
+      icon: <RiStoreLine size={18} />,
+      title: 'Use at checkout',
+      desc:  'Apply SAFI as payment on your next order',
+    },
+    {
+      icon: <RiCoinLine size={18} />,
+      title: reward.newBalance ? `${reward.newBalance} SAFI total` : 'Balance updated',
+      desc:  'Your wallet balance has been updated',
     },
   ];
 
@@ -95,7 +117,59 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
             </button>
 
             <AnimatePresence mode="wait">
-              {step === 'celebrate' ? (
+              {/* ═══ AUTO-MINTED: Points already in wallet ═══ */}
+              {isAutoMinted ? (
+                <motion.div
+                  key="auto-minted"
+                  className="rp-body"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="rp-header rp-header--success">
+                    <span className="rp-header-icon rp-header-icon--success">
+                      <RiCheckboxCircleLine size={38} />
+                    </span>
+                    <h3 className="rp-header-title">Cashback added!</h3>
+                    <p className="rp-header-sub">Automatically added to your wallet</p>
+                  </div>
+
+                  <div className="rp-amount-card rp-amount-card--success">
+                    <span className="rp-amount-safi">+{reward.safiEarned} SAFI</span>
+                    <span className="rp-amount-ksh">≈ KES {reward.kshCashback}</span>
+                    <span className="rp-amount-label">added to your balance</span>
+                  </div>
+
+                  <div className="rp-benefits">
+                    {mintedBenefits.map(b => (
+                      <div className="rp-benefit" key={b.title}>
+                        <div className="rp-benefit-icon rp-benefit-icon--success">{b.icon}</div>
+                        <div className="rp-benefit-text">
+                          <strong>{b.title}</strong>
+                          <p>{b.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {reward.xrplTxHash && (
+                    <a
+                      className="rp-tx-link"
+                      href={`https://testnet.xrpl.org/transactions/${reward.xrplTxHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <RiExternalLinkLine size={14} />
+                      View on XRPL Ledger
+                    </a>
+                  )}
+
+                  <button className="rp-cta-primary rp-cta-primary--success" onClick={handleDismiss}>
+                    Done
+                  </button>
+                </motion.div>
+              ) : step === 'celebrate' ? (
+                /* ═══ PENDING: Celebrate step ═══ */
                 <motion.div
                   key="celebrate"
                   className="rp-body"
@@ -103,7 +177,6 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0, x: -30 }}
                 >
-                  {/* Header */}
                   <div className="rp-header">
                     <span className="rp-header-icon">
                       <RiSparklingFill size={38} />
@@ -112,7 +185,6 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
                     <p className="rp-header-sub">at {reward.merchantName}</p>
                   </div>
 
-                  {/* Amount */}
                   <div className="rp-amount-card">
                     <span className="rp-amount-safi">{reward.safiEarned} SAFI</span>
                     <span className="rp-amount-ksh">≈ KES {reward.kshCashback}</span>
@@ -127,6 +199,7 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
                   </button>
                 </motion.div>
               ) : (
+                /* ═══ PENDING: Invite step ═══ */
                 <motion.div
                   key="invite"
                   className="rp-body"
@@ -146,7 +219,7 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
                   </div>
 
                   <div className="rp-benefits">
-                    {benefits.map(b => (
+                    {pendingBenefits.map(b => (
                       <div className="rp-benefit" key={b.title}>
                         <div className="rp-benefit-icon">{b.icon}</div>
                         <div className="rp-benefit-text">

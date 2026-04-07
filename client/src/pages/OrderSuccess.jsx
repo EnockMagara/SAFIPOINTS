@@ -101,15 +101,19 @@ export default function OrderSuccess() {
         {/* SAFI earned badge */}
         {reward && (
           <motion.div
-            className="os-safi-badge"
+            className={`os-safi-badge ${reward.autoMinted ? 'os-safi-badge--minted' : ''}`}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8, type: 'spring' }}
           >
-            <span className="os-safi-icon">✨</span>
+            <span className="os-safi-icon">{reward.autoMinted ? '✅' : '✨'}</span>
             <div>
               <div className="os-safi-amount">+{reward.safiEarned} SAFI earned</div>
-              <div className="os-safi-sub">KES {reward.kshCashback} cashback waiting for you</div>
+              <div className="os-safi-sub">
+                {reward.autoMinted
+                  ? 'Added to your wallet automatically'
+                  : `KES ${reward.kshCashback} cashback waiting for you`}
+              </div>
             </div>
           </motion.div>
         )}
