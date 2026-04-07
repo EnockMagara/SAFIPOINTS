@@ -110,7 +110,7 @@ export default function ClaimPage() {
             <li>
               <span className="cp-next-steps-num">2</span>
               <span>
-                <strong>Sign in with your phone</strong> — we&apos;ve saved your wallet to your number. No extra signup step; use the same phone you entered above (demo: phone-only sign-in).
+                <strong>Wallet linked to your phone</strong> — use the same number you entered above to access your wallet anytime.
               </span>
             </li>
           </ol>
@@ -147,11 +147,8 @@ export default function ClaimPage() {
                 },
               })}
             >
-              Sign in to open my wallet
+              Open my wallet
             </button>
-            <Link to="/register" className="cp-link-subtle">
-              New here without a claim? Create an account
-            </Link>
             <Link to="/" className="cp-link-subtle">
               Back to home
             </Link>

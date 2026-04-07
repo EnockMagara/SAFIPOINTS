@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   RiSparklingFill,
-  RiShieldCheckLine,
   RiCoinLine,
   RiStoreLine,
   RiTimeLine,
@@ -27,7 +26,6 @@ import {
  */
 export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDelay = 1500 }) {
   const [visible, setVisible] = useState(false);
-  const [step, setStep]       = useState('celebrate'); // 'celebrate' | 'invite'
   const navigate = useNavigate();
 
   const isAutoMinted = reward?.autoMinted === true;
@@ -168,14 +166,14 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
                     Done
                   </button>
                 </motion.div>
-              ) : step === 'celebrate' ? (
-                /* ═══ PENDING: Celebrate step ═══ */
+              ) : (
+                /* ═══ PENDING: Single-step claim ═══ */
                 <motion.div
-                  key="celebrate"
+                  key="pending"
                   className="rp-body"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, x: -30 }}
+                  exit={{ opacity: 0 }}
                 >
                   <div className="rp-header">
                     <span className="rp-header-icon">
@@ -191,33 +189,6 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
                     <span className="rp-amount-label">cashback earned</span>
                   </div>
 
-                  <button className="rp-cta-primary" onClick={() => setStep('invite')}>
-                    Claim my cashback
-                  </button>
-                  <button className="rp-cta-dismiss" onClick={handleDismiss}>
-                    Maybe later
-                  </button>
-                </motion.div>
-              ) : (
-                /* ═══ PENDING: Invite step ═══ */
-                <motion.div
-                  key="invite"
-                  className="rp-body"
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div className="rp-header">
-                    <span className="rp-header-icon">
-                      <RiShieldCheckLine size={38} />
-                    </span>
-                    <h3 className="rp-header-title">Save your rewards</h3>
-                    <p className="rp-header-sub">
-                      Sign up to lock in your{' '}
-                      <strong>KES {reward.kshCashback}</strong> before it expires
-                    </p>
-                  </div>
-
                   <div className="rp-benefits">
                     {pendingBenefits.map(b => (
                       <div className="rp-benefit" key={b.title}>
@@ -231,10 +202,10 @@ export default function RewardPrompt({ reward, onDismiss, onSignUp, autoShowDela
                   </div>
 
                   <button className="rp-cta-primary" onClick={handleClaim}>
-                    Sign up &amp; claim KES {reward.kshCashback}
+                    Claim KES {reward.kshCashback}
                   </button>
                   <button className="rp-cta-dismiss" onClick={handleDismiss}>
-                    I'll come back later
+                    Maybe later
                   </button>
                 </motion.div>
               )}
