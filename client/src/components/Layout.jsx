@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import '../styles/layout.css';
 
 const merchantNav = [
   { path: '/dashboard', label: 'Dashboard', icon: '◎' },
@@ -18,48 +20,62 @@ export default function Layout({ children }) {
   const { user, logout, isMerchant } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Close sidebar on route change (mobile nav tap)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => { logout(); navigate('/'); };
   const navItems = isMerchant ? merchantNav : customerNav;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#FAFAFA' }}>
+    <div className="sp-layout">
+      {/* ── Mobile Overlay ───────────────────────────── */}
+      <div
+        className={`sp-sidebar-overlay${sidebarOpen ? ' open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       {/* ── Sidebar ──────────────────────────────────── */}
-      <aside style={{
-        width: 240,
-        background: '#0F1524',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        zIndex: 50,
-      }}>
-        {/* Logo */}
+      <aside className={`sp-sidebar${sidebarOpen ? ' open' : ''}`}>
+        {/* Logo + Close */}
         <div style={{
           padding: '28px 24px 20px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
         }}>
-          <Link to={isMerchant ? '/dashboard' : '/wallet'} style={{
-            textDecoration: 'none',
-            fontWeight: 800,
-            fontSize: 18,
-            letterSpacing: '-0.02em',
-            background: 'linear-gradient(135deg, #EFBF4A, #F5D07A)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>
-            SafiPoints
-          </Link>
-          <div style={{
-            fontSize: 11,
-            color: 'rgba(255,255,255,0.25)',
-            marginTop: 4,
-            fontWeight: 500,
-          }}>
-            {isMerchant ? 'Business Console' : 'Customer Rewards'}
+          <div>
+            <Link to={isMerchant ? '/dashboard' : '/wallet'} style={{
+              textDecoration: 'none',
+              fontWeight: 800,
+              fontSize: 18,
+              letterSpacing: '-0.02em',
+              background: 'linear-gradient(135deg, #EFBF4A, #F5D07A)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              SafiPoints
+            </Link>
+            <div style={{
+              fontSize: 11,
+              color: 'rgba(255,255,255,0.25)',
+              marginTop: 4,
+              fontWeight: 500,
+            }}>
+              {isMerchant ? 'Business Console' : 'Customer Rewards'}
+            </div>
           </div>
+          <button
+            className="sp-sidebar-close"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close menu"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Nav Items */}
@@ -140,22 +156,24 @@ export default function Layout({ children }) {
       </aside>
 
       {/* ── Main Content ─────────────────────────────── */}
-      <main style={{
-        marginLeft: 240,
-        flex: 1,
-        minHeight: '100vh',
-      }}>
+      <main className="sp-main">
         {/* Top Bar */}
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 40,
-          background: 'rgba(250, 250, 250, 0.85)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #F3F4F6',
-          padding: '16px 32px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
-          <div style={{ fontSize: 13, color: 'var(--text-tertiary)', fontWeight: 500 }}>
-            {isMerchant ? 'Business Workspace' : 'Customer Workspace'} · SafiPoints
+        <div className="sp-topbar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+              className="sp-hamburger"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+            >
+              <div className="sp-hamburger-icon">
+                <span />
+                <span />
+                <span />
+              </div>
+            </button>
+            <div style={{ fontSize: 13, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+              {isMerchant ? 'Business Workspace' : 'Customer Workspace'} · SafiPoints
+            </div>
           </div>
           <a href="https://testnet.xrpl.org" target="_blank" rel="noreferrer" style={{
             fontSize: 12, color: 'var(--gold)', textDecoration: 'none',
@@ -166,7 +184,7 @@ export default function Layout({ children }) {
           </a>
         </div>
 
-        <div style={{ padding: '28px 32px', maxWidth: 1000 }}>
+        <div className="sp-main-content">
           {children}
         </div>
       </main>
