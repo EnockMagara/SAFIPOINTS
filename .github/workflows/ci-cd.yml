@@ -95,7 +95,28 @@ jobs:
           script: |
             cd /var/www/safipoints
             git fetch origin main && git reset --hard origin/main
+
+            # ── Pre-deploy disk check ──
+            DISK_PCT=$(df / --output=pcent | tail -1 | tr -dc '0-9')
+            if [ "$DISK_PCT" -gt 85 ]; then
+              echo "⚠️  Disk at ${DISK_PCT}% — running emergency cleanup..."
+              docker system prune -af
+              journalctl --vacuum-size=20M
+              apt-get clean 2>/dev/null || true
+            fi
+
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose -f docker-compose.yml pull
             docker compose -f docker-compose.yml up -d --force-recreate
-            docker image prune -f
+
+            # ── Post-deploy cleanup: remove ALL unused images, not just dangling ──
+            docker system prune -af --filter "until=24h"
+
+            # ── Verify API is healthy ──
+            sleep 10
+            if docker ps --filter "name=safipoints-api" --format '{{.Status}}' | grep -q "unhealthy"; then
+              echo "❌ API container is unhealthy! Checking logs..."
+              docker logs safipoints-api-1 --tail 20
+              exit 1
+            fi
+            echo "✅ Deployment complete — disk at $(df / --output=pcent | tail -1 | tr -d ' ')%"

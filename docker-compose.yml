@@ -3,6 +3,11 @@ services:
   mongo:
     image: mongo:7
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - mongo_data:/data/db
     healthcheck:
@@ -16,6 +21,11 @@ services:
   api:
     image: ghcr.io/enockmagara/safipoints-api:latest
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     env_file: .env
     environment:
       - MONGODB_URI=mongodb://mongo:27017/safipoints
@@ -29,11 +39,21 @@ services:
   client:
     image: ghcr.io/enockmagara/safipoints-client:latest
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
 
   # ─── Nginx Reverse Proxy ───────────────────────────────────
   nginx:
     image: nginx:alpine
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "80:80"
       - "443:443"

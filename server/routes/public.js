@@ -3,11 +3,9 @@ const Merchant = require('../models/Merchant');
 const MenuItem = require('../models/MenuItem');
 const Order = require('../models/Order');
 const PendingPoints = require('../models/PendingPoints');
+const Customer = require('../models/Customer');
 const LoyaltyService = require('../services/LoyaltyService');
 const SafiSendBridge = require('../services/SafiSendBridge');
-
-const Customer = require('../models/Customer');
-const Merchant = require('../models/Merchant');
 const TokenService = require('../services/TokenService');
 
 const router = express.Router();
