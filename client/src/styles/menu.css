@@ -325,6 +325,22 @@
 
 .mp-sheet-error { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #DC2626; margin-top: 4px; }
 
+/* SAFI balance status indicator in cart sheet */
+.mp-sheet-safi-status {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 12px;
+  font-size: 12.5px; line-height: 1.4;
+}
+.mp-sheet-safi-status .mp-sheet-safi-dot { color: var(--gold); font-size: 12px; flex-shrink: 0; }
+.mp-sheet-safi-status--loading { color: #8B7E6E; background: rgba(239,191,74,0.04); }
+.mp-sheet-safi-status--found {
+  color: #3a3025;
+  background: linear-gradient(135deg, rgba(239,191,74,0.1), rgba(239,191,74,0.04));
+  border: 1px solid rgba(239,191,74,0.25);
+}
+.mp-sheet-safi-status--pending { color: #6B6355; background: rgba(239,191,74,0.05); border: 1px solid rgba(239,191,74,0.15); }
+.mp-sheet-safi-status--pending a { color: var(--gold); font-weight: 600; text-decoration: underline; }
+
 .mp-sheet-footer {
   flex-shrink: 0;
   padding: 12px 20px max(16px, env(safe-area-inset-bottom));

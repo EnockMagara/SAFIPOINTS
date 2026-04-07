@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api/client';
@@ -42,11 +42,50 @@ export default function PayPage() {
 
   const order    = state?.order;
   const merchant = state?.merchant;
+  const safiStatus = state?.safiStatus;
+  const customerPhone = state?.customerPhone;
 
   const [selected, setSelected] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [step, setStep] = useState(0);
   const [error, setError] = useState('');
+
+  // SAFI discount state
+  const [useSafi, setUseSafi] = useState(false);
+  const [discountPreview, setDiscountPreview] = useState(null);
+  const [loadingDiscount, setLoadingDiscount] = useState(false);
+
+  const canUseSafi = safiStatus?.enrolled && safiStatus?.canRedeem && safiStatus?.balance > 0;
+
+  // Fetch discount preview when SAFI toggle is enabled
+  useEffect(() => {
+    if (!useSafi || !canUseSafi || !order || !merchant) {
+      setDiscountPreview(null);
+      return;
+    }
+    let cancelled = false;
+    const fetchDiscount = async () => {
+      setLoadingDiscount(true);
+      try {
+        const res = await api.post('/public/calculate-discount', {
+          customerPhone: customerPhone || '',
+          merchantId: merchant.id,
+          orderAmount: order.total,
+        });
+        if (!cancelled) setDiscountPreview(res.data);
+      } catch {
+        if (!cancelled) setDiscountPreview(null);
+      } finally {
+        if (!cancelled) setLoadingDiscount(false);
+      }
+    };
+    fetchDiscount();
+    return () => { cancelled = true; };
+  }, [useSafi, canUseSafi, order, merchant, state]);
+
+  const effectiveTotal = discountPreview?.available
+    ? Math.max(0, order.total - discountPreview.discountAmount)
+    : order?.total;
 
   const handlePay = async () => {
     if (!selected) return;
@@ -60,7 +99,13 @@ export default function PayPage() {
     setStep(PROCESSING_STEPS.length - 1);
 
     try {
-      const res = await api.post(`/public/order/${orderId}/pay`, { method: selected });
+      const payload = { method: selected };
+      if (useSafi && discountPreview?.available) {
+        payload.safiDiscount = {
+          pointsToUse: discountPreview.pointsToUse,
+        };
+      }
+      const res = await api.post(`/public/order/${orderId}/pay`, payload);
       await new Promise(r => setTimeout(r, 700));
       navigate(`/order-success/${orderId}`, {
         replace: true,
@@ -137,6 +182,65 @@ export default function PayPage() {
                 </div>
               )}
 
+              {/* ── SAFI Discount Card ────────────────── */}
+              {canUseSafi && (
+                <div className="pp-safi-discount">
+                  <button
+                    type="button"
+                    className={`pp-safi-toggle ${useSafi ? 'pp-safi-toggle--active' : ''}`}
+                    onClick={() => setUseSafi(prev => !prev)}
+                  >
+                    <div className="pp-safi-toggle-left">
+                      <span className="pp-safi-toggle-icon">✦</span>
+                      <div className="pp-safi-toggle-text">
+                        <span className="pp-safi-toggle-label">Pay with SAFI Points</span>
+                        <span className="pp-safi-toggle-sub">
+                          {safiStatus.balance} SAFI available · {safiStatus.tier} tier
+                        </span>
+                      </div>
+                    </div>
+                    <div className={`pp-safi-switch ${useSafi ? 'pp-safi-switch--on' : ''}`}>
+                      <div className="pp-safi-switch-thumb" />
+                    </div>
+                  </button>
+
+                  {useSafi && (
+                    <motion.div
+                      className="pp-safi-preview"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {loadingDiscount ? (
+                        <div className="pp-safi-preview-loading">Calculating discount…</div>
+                      ) : discountPreview?.available ? (
+                        <>
+                          <div className="pp-safi-preview-row">
+                            <span>Points to use</span>
+                            <span className="pp-safi-preview-val">{discountPreview.pointsToUse} SAFI</span>
+                          </div>
+                          <div className="pp-safi-preview-row">
+                            <span>Discount</span>
+                            <span className="pp-safi-preview-val pp-safi-preview-val--green">
+                              −KES {discountPreview.discountAmount.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="pp-safi-preview-row pp-safi-preview-row--total">
+                            <span>You pay</span>
+                            <span className="pp-safi-preview-val">KES {effectiveTotal.toLocaleString()}</span>
+                          </div>
+                        </>
+                      ) : discountPreview ? (
+                        <div className="pp-safi-preview-note">
+                          {discountPreview.reason || 'Not enough SAFI points for a discount'}
+                        </div>
+                      ) : null}
+                    </motion.div>
+                  )}
+                </div>
+              )}
+
               {/* ── Payment Methods ───────────────────── */}
               <div className="pp-methods">
                 <p className="pp-methods-label">How would you like to pay?</p>
@@ -175,7 +279,7 @@ export default function PayPage() {
                   whileTap={selected ? { scale: 0.97 } : {}}
                 >
                   <span className="pp-pay-btn-label">Pay Now</span>
-                  <span className="pp-pay-btn-amount">KES {order.total?.toLocaleString()}</span>
+                  <span className="pp-pay-btn-amount">KES {(effectiveTotal ?? order.total)?.toLocaleString()}</span>
                 </motion.button>
                 <p className="pp-cta-note">🔒 Secured · 256-bit encryption</p>
               </div>

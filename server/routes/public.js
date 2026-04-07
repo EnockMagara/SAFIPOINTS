@@ -119,18 +119,34 @@ router.post('/order', async (req, res, next) => {
 
 // ─── POST /api/public/order/:id/pay ─────────────────────────
 // Simulate payment → triggers SAFI earn (PendingPoints).
+// Optionally applies SAFI discount (burns tokens on-chain first).
 router.post('/order/:id/pay', async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id).populate('merchant');
     if (!order) return res.status(404).json({ error: 'Order not found' });
     if (order.status === 'paid') return res.status(409).json({ error: 'Order already paid' });
 
+    const merchant = order.merchant;
+    let safiDiscountResult = null;
+
+    // If customer is applying SAFI points as partial payment, burn them first
+    if (req.body.safiDiscount && req.body.safiDiscount.pointsToUse > 0) {
+      const { pointsToUse } = req.body.safiDiscount;
+      safiDiscountResult = await SafiSendBridge.applyCheckoutDiscount({
+        customerPhone: order.customerPhone,
+        merchantId: merchant._id,
+        pointsToUse,
+        orderId: order._id.toString(),
+      });
+      // Reduce order total by discount amount
+      order.total = Math.max(0, order.total - safiDiscountResult.discountAmount);
+    }
+
     // Simulate payment success
     order.status = 'paid';
     order.paymentMethod = req.body.method || 'simulated';
     order.paidAt = new Date();
 
-    const merchant = order.merchant;
     const tier = 'bronze';
     const safiAmount = LoyaltyService.calculateEarn(order.total, merchant.earnRate, tier);
     const earnRate = merchant.earnRate;
@@ -173,6 +189,11 @@ router.post('/order/:id/pay', async (req, res, next) => {
       total: order.total,
       currency: order.currency,
       paidAt: order.paidAt,
+      safiDiscount: safiDiscountResult ? {
+        pointsBurned: safiDiscountResult.pointsBurned,
+        discountAmount: safiDiscountResult.discountAmount,
+        xrplTxHash: safiDiscountResult.xrplTxHash,
+      } : null,
       reward: {
         safiEarned: safiAmount,
         kshCashback: (safiAmount * earnRate).toFixed(2),
@@ -183,6 +204,38 @@ router.post('/order/:id/pay', async (req, res, next) => {
         expiryDays: 365,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── GET /api/public/safi-status ─────────────────────────────
+// Check if a phone number has SAFI balance with a merchant (no auth).
+router.get('/safi-status', async (req, res, next) => {
+  try {
+    const { phone, merchantId } = req.query;
+    if (!phone || !merchantId) {
+      return res.status(400).json({ error: 'phone and merchantId are required' });
+    }
+    const status = await SafiSendBridge.getCustomerStatus(phone, merchantId);
+    res.json(status);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── POST /api/public/calculate-discount ────────────────────
+// Preview SAFI discount amount for checkout (no auth).
+router.post('/calculate-discount', async (req, res, next) => {
+  try {
+    const { customerPhone, merchantId, pointsToRedeem, orderAmount } = req.body;
+    if (!customerPhone || !merchantId || !orderAmount) {
+      return res.status(400).json({ error: 'customerPhone, merchantId, and orderAmount are required' });
+    }
+    const result = await SafiSendBridge.calculateDiscount({
+      customerPhone, merchantId, pointsToRedeem, orderAmount,
+    });
+    res.json(result);
   } catch (err) {
     next(err);
   }

@@ -21,6 +21,31 @@ export default function MenuPage() {
   const [name, setName] = useState('');
   const [placing, setPlacing] = useState(false);
   const [formError, setFormError] = useState('');
+  const [safiStatus, setSafiStatus] = useState(null);
+  const [checkingSafi, setCheckingSafi] = useState(false);
+
+  // Check SAFI status when phone changes (debounced)
+  useEffect(() => {
+    const trimmed = phone.replace(/\s/g, '');
+    if (trimmed.length < 10 || !merchant) {
+      setSafiStatus(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setCheckingSafi(true);
+      try {
+        const res = await api.get('/public/safi-status', {
+          params: { phone: trimmed, merchantId: merchant.id },
+        });
+        setSafiStatus(res.data);
+      } catch {
+        setSafiStatus(null);
+      } finally {
+        setCheckingSafi(false);
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [phone, merchant]);
 
   useEffect(() => {
     const load = async () => {
@@ -77,7 +102,7 @@ export default function MenuPage() {
         customerName: name || 'Guest',
       });
       navigate(`/pay/${res.data.orderId}`, {
-        state: { order: res.data, merchant, safiPreview },
+        state: { order: res.data, merchant, safiPreview, safiStatus, customerPhone: phone },
       });
     } catch (err) {
       setFormError(err.response?.data?.error || 'Failed to place order. Please try again.');
@@ -362,6 +387,25 @@ export default function MenuPage() {
                         required
                       />
                     </div>
+
+                    {/* SAFI balance indicator */}
+                    {checkingSafi && (
+                      <div className="mp-sheet-safi-status mp-sheet-safi-status--loading">
+                        <span className="mp-sheet-safi-dot">✦</span> Checking SAFI balance…
+                      </div>
+                    )}
+                    {!checkingSafi && safiStatus?.enrolled && safiStatus.canRedeem && (
+                      <div className="mp-sheet-safi-status mp-sheet-safi-status--found">
+                        <span className="mp-sheet-safi-dot">✦</span>
+                        <strong>{safiStatus.balance} SAFI</strong> available — use as payment on the next screen!
+                      </div>
+                    )}
+                    {!checkingSafi && safiStatus && !safiStatus.enrolled && safiStatus.pendingSafi > 0 && (
+                      <div className="mp-sheet-safi-status mp-sheet-safi-status--pending">
+                        <span className="mp-sheet-safi-dot">✦</span>
+                        {safiStatus.pendingSafi} SAFI pending — <a href="/claim">claim them first</a> to use at checkout
+                      </div>
+                    )}
                     <div className="mp-sheet-field">
                       <div className="mp-sheet-field-icon" aria-hidden>👤</div>
                       <input
