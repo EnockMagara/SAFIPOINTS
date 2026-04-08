@@ -30,16 +30,16 @@ export default function Landing() {
         </div>
         <div className="land-hero-overlay" />
         <div className="land-hero-inner">
-          <p className="land-kicker">Blockchain loyalty for restaurants</p>
+          <p className="land-kicker">Blockchain loyalty for Commerce</p>
 
           <h1 className="land-title">
-            Reward every meal.<br />
-            <span className="land-title-gold">On-chain.</span>
+            Your customers deserve<br />
+            <span className="land-title-gold">more than a receipt.</span>
           </h1>
 
           <p className="land-subtitle">
-            SafiPoints turns restaurant spending into SAFI tokens on the XRP Ledger.
-            Customers earn cashback automatically and redeem it at checkout.
+            Every order earns cashback. Customers spend it on their next visit.
+            No app. No card. Just scan and go.
           </p>
 
           <div className="land-ctas">
