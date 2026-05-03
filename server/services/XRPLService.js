@@ -62,8 +62,14 @@ class XRPLService {
 
   /**
    * Send SAFI tokens from issuer to customer (earn) or customer to issuer (redeem/burn).
+   *
+   * @param {object}      senderWallet       - xrpl.Wallet instance
+   * @param {string}      destinationAddress - recipient XRPL address
+   * @param {number}      amount             - token amount
+   * @param {string}      issuerAddress      - XRPL issuer address
+   * @param {object|null} memoData           - optional SafiScore attestation memo payload
    */
-  static async sendTokens(senderWallet, destinationAddress, amount, issuerAddress) {
+  static async sendTokens(senderWallet, destinationAddress, amount, issuerAddress, memoData = null) {
     const client = await connectXRPL();
     const tx = {
       TransactionType: 'Payment',
@@ -75,6 +81,20 @@ class XRPLService {
         value: String(amount),
       },
     };
+
+    // Attach SafiScore attestation memo if provided.
+    // XRPL Memos must be hex-encoded; keep payload compact to stay under ~1KB limit.
+    if (memoData) {
+      const toHex = (str) => Buffer.from(str, 'utf8').toString('hex').toUpperCase();
+      tx.Memos = [{
+        Memo: {
+          MemoType:   toHex('safiscore/v1'),
+          MemoFormat: toHex('application/json'),
+          MemoData:   toHex(JSON.stringify(memoData)),
+        },
+      }];
+    }
+
     const prepared = await client.autofill(tx);
     const signed = senderWallet.sign(prepared);
     const result = await client.submitAndWait(signed.tx_blob);

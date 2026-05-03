@@ -11,20 +11,20 @@ const Merchant = require('../models/Merchant');
 const MenuItem = require('../models/MenuItem');
 
 const DEMO_MENUS = {
-  kenyan: [
-    { name: 'Nyama Choma',      price: 850,  category: 'Mains',    emoji: '🥩', description: 'Slow-roasted goat ribs with kachumbari' },
-    { name: 'Ugali & Sukuma',   price: 350,  category: 'Mains',    emoji: '🌽', description: 'Classic Kenyan staple with sautéed greens' },
-    { name: 'Pilau',            price: 450,  category: 'Mains',    emoji: '🍚', description: 'Spiced rice with tender beef pieces' },
-    { name: 'Fish Fry (Tilapia)', price: 650, category: 'Mains',   emoji: '🐟', description: 'Whole fried tilapia with ugali & greens' },
-    { name: 'Chicken Biryani',  price: 550,  category: 'Mains',    emoji: '🍗', description: 'Fragrant rice layered with spiced chicken' },
-    { name: 'Chapati (2pc)',    price: 80,   category: 'Sides',    emoji: '🫓', description: 'Soft layered Kenyan flatbread' },
-    { name: 'Kachumbari',       price: 100,  category: 'Sides',    emoji: '🥗', description: 'Fresh tomato, onion & coriander salad' },
-    { name: 'Mukimo',           price: 200,  category: 'Sides',    emoji: '🥔', description: 'Mashed potatoes with corn, peas & greens' },
-    { name: 'Mandazi (3pc)',    price: 120,  category: 'Desserts',  emoji: '🍩', description: 'East African coconut doughnuts' },
-    { name: 'Chai Masala',      price: 100,  category: 'Drinks',   emoji: '🍵', description: 'Spiced Kenyan milk tea' },
-    { name: 'Fresh Mango Juice',price: 200,  category: 'Drinks',   emoji: '🥭', description: 'Freshly blended mango' },
-    { name: 'Tusker Lager',     price: 300,  category: 'Drinks',   emoji: '🍺', description: 'Kenya\'s favourite lager' },
-    { name: 'Stoney Tangawizi', price: 120,  category: 'Drinks',   emoji: '🥤', description: 'Ginger beer soda' },
+  uae: [
+    { name: 'Machboos (Lamb)',        price: 55,  category: 'Mains',    emoji: '🍖', description: 'Slow-cooked spiced rice with tender lamb' },
+    { name: 'Mixed Grill Platter',    price: 95,  category: 'Mains',    emoji: '🥩', description: 'Assorted grilled meats with saffron rice' },
+    { name: 'Shawarma Wrap',          price: 28,  category: 'Mains',    emoji: '🌯', description: 'Classic chicken shawarma with garlic sauce' },
+    { name: 'Grilled Hammour',        price: 75,  category: 'Mains',    emoji: '🐟', description: 'Whole grilled hammour with herb butter' },
+    { name: 'Kabsa (Chicken)',        price: 45,  category: 'Mains',    emoji: '🍗', description: 'Fragrant spiced rice with roasted chicken' },
+    { name: 'Hummus & Pita',          price: 22,  category: 'Sides',    emoji: '🫓', description: 'Creamy hummus with warm pita bread' },
+    { name: 'Fattoush Salad',         price: 25,  category: 'Sides',    emoji: '🥗', description: 'Fresh vegetables with crispy bread & pomegranate' },
+    { name: 'Mutabbaq (Spinach)',      price: 30,  category: 'Sides',    emoji: '🥬', description: 'Crispy stuffed pastry with spiced spinach' },
+    { name: 'Luqaimat',               price: 20,  category: 'Desserts', emoji: '🍯', description: 'Crispy Emirati dumplings drizzled with date syrup' },
+    { name: 'Umm Ali',                price: 28,  category: 'Desserts', emoji: '🍮', description: 'Traditional UAE bread pudding with nuts & cream' },
+    { name: 'Karak Chai',             price: 8,   category: 'Drinks',   emoji: '🍵', description: 'Rich spiced tea brewed with evaporated milk' },
+    { name: 'Fresh Lemon Mint',       price: 18,  category: 'Drinks',   emoji: '🍋', description: 'Freshly squeezed lemon with crushed mint' },
+    { name: 'Jallab Juice',           price: 20,  category: 'Drinks',   emoji: '🍇', description: 'Sweet grape juice with rose water & raisins' },
   ],
 };
 
@@ -46,7 +46,7 @@ async function seedMenu(slug) {
       continue;
     }
 
-    const items = DEMO_MENUS.kenyan.map((item, i) => ({
+    const items = DEMO_MENUS.uae.map((item, i) => ({
       ...item,
       merchant: merchant._id,
       sortOrder: i,

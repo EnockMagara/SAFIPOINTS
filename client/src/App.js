@@ -14,6 +14,8 @@ import ClaimPage from './pages/ClaimPage';
 import MenuPage from './pages/MenuPage';
 import PayPage from './pages/PayPage';
 import OrderSuccess from './pages/OrderSuccess';
+import CreditDashboard from './pages/CreditDashboard';
+import LenderPortal from './pages/LenderPortal';
 import './App.css';
 
 function ProtectedRoute({ children, role }) {
@@ -49,6 +51,13 @@ function AppRoutes() {
       <Route path="/redeem" element={
         <ProtectedRoute role="customer"><Layout><RedeemPage /></Layout></ProtectedRoute>
       } />
+      {/* ── SafiScore routes ────────────────────────────────────────── */}
+      <Route path="/credit" element={
+        <ProtectedRoute role="customer"><Layout><CreditDashboard /></Layout></ProtectedRoute>
+      } />
+      {/* Public: lender verification portal — also accessible at /verify/:id from share links */}
+      <Route path="/lender"          element={<LenderPortal />} />
+      <Route path="/verify/:attestationId" element={<LenderPortal />} />
       {/* ── Public routes (no auth) ─────────────────────── */}
       {/* Customer ordering journey: scan QR → menu → pay → success → claim */}
       <Route path="/m/:slug" element={<MenuPage />} />

@@ -33,6 +33,10 @@ app.use('/api/customers', require('./routes/customers'));
 app.use('/api/integration', require('./routes/integration'));
 app.use('/api/public', require('./routes/public'));
 
+// ── SafiScore credit layer ───────────────────────────────────
+app.use('/api/safiscore', require('./routes/safiscore'));
+app.use('/api/lender',    require('./routes/lender'));
+
 // Root
 app.get('/', (_req, res) => {
   res.json({

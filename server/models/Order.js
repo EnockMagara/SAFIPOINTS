@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema({
 
   subtotal:  { type: Number, required: true },
   total:     { type: Number, required: true },
-  currency:  { type: String, default: 'KES' },
+  currency:  { type: String, default: 'AED' },
 
   status: {
     type: String,

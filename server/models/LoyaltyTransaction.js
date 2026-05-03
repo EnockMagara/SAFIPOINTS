@@ -23,6 +23,17 @@ const loyaltyTransactionSchema = new mongoose.Schema({
     default: 'pending',
   },
 
+  // ── SafiScore attestation fields ─────────────────────────────────────────
+  // Written at earn-time; used by SafiScoreService for credit profile building
+  safiscoreEnrolled: { type: Boolean, default: true },
+  safiscoreCategory: {
+    type: String,
+    enum: ['food_beverage', 'grocery', 'pharmacy', 'fuel', 'retail', 'other'],
+    default: 'food_beverage',
+  },
+  // SHA256 of the XRPL memo attestation payload — anchors off-chain record to on-chain tx
+  safiscoreAttestationHash: { type: String },
+
   metadata: { type: mongoose.Schema.Types.Mixed },  // orderId, source, etc.
 }, {
   timestamps: true,

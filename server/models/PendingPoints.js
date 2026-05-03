@@ -36,7 +36,7 @@ const pendingPointsSchema = new mongoose.Schema({
   safiAmount: { type: Number, required: true, min: 0 },
   fiatAmount: { type: Number, required: true },
 
-  // Rate locked at earn time — 1 SAFI = earnRate KES
+  // Rate locked at earn time — 1 SAFI = earnRate AED
   // This is what the customer redeems at regardless of future global rate changes.
   earnRate: { type: Number, required: true },
 
@@ -90,7 +90,7 @@ const pendingPointsSchema = new mongoose.Schema({
 // Compound index: one record per order+merchant (idempotency)
 pendingPointsSchema.index({ orderId: 1, merchant: 1 }, { unique: true });
 
-pendingPointsSchema.virtual('kshCashback').get(function () {
+pendingPointsSchema.virtual('aedCashback').get(function () {
   return (this.safiAmount * this.earnRate).toFixed(2);
 });
 

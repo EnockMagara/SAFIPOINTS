@@ -8,17 +8,19 @@ const WalletService = require('../services/WalletService');
 const TokenService = require('../services/TokenService');
 const Merchant = require('../models/Merchant');
 const Customer = require('../models/Customer');
+const LoyaltyTransaction = require('../models/LoyaltyTransaction');
+const RedemptionRequest = require('../models/RedemptionRequest');
 
 const MERCHANTS = [
-  { name: 'Kilimanjaro Grill', email: 'kili@demo.com', phone: '+254700000001' },
-  { name: 'Safari Bites', email: 'safari@demo.com', phone: '+254700000002' },
-  { name: 'Nairobi Spice', email: 'spice@demo.com', phone: '+254700000003' },
+  { name: 'Al Fanar Restaurant', email: 'alfanar@demo.com', phone: '+971501000001' },
+  { name: 'Reem Al Bawadi', email: 'reem@demo.com', phone: '+971501000002' },
+  { name: 'Zaroob UAE', email: 'zaroob@demo.com', phone: '+971501000003' },
 ];
 
 const CUSTOMERS = [
-  { name: 'Jane Wanjiku', phone: '+254711111111', email: 'jane@demo.com' },
-  { name: 'John Kamau', phone: '+254722222222', email: 'john@demo.com' },
-  { name: 'Grace Achieng', phone: '+254733333333', email: 'grace@demo.com' },
+  { name: 'Mohammed Al Rashidi', phone: '+971551111111', email: 'mohammed@demo.com' },
+  { name: 'Aisha Al Mansoori', phone: '+971552222222', email: 'aisha@demo.com' },
+  { name: 'Khalid Al Hashimi', phone: '+971553333333', email: 'khalid@demo.com' },
 ];
 
 async function seed() {
@@ -31,8 +33,8 @@ async function seed() {
   await Promise.all([
     Merchant.deleteMany({}),
     Customer.deleteMany({}),
-    mongoose.model('LoyaltyTransaction').deleteMany({}),
-    mongoose.model('RedemptionRequest').deleteMany({}),
+    LoyaltyTransaction.deleteMany({}),
+    RedemptionRequest.deleteMany({}),
   ]);
   console.log('  Cleared existing data\n');
 
@@ -95,8 +97,8 @@ async function seed() {
   console.log('  Seed complete!\n');
   console.log('  Demo credentials:');
   console.log('  ─────────────────');
-  console.log('  Merchant login: kili@demo.com / demo1234');
-  console.log('  Customer login: +254711111111 (Jane)');
+  console.log('  Merchant login: alfanar@demo.com / demo1234');
+  console.log('  Customer login: +971551111111 (Mohammed)');
   console.log(`  Merchant ID: ${merchants[0]._id}`);
   console.log('');
 

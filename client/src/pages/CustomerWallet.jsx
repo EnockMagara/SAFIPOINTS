@@ -68,6 +68,9 @@ export default function CustomerWallet() {
           <Link to="/redeem" className="sp-btn sp-btn-gold" style={{ width: '100%', marginBottom: 10 }}>
             Redeem Rewards
           </Link>
+          <Link to="/credit" className="sp-btn sp-btn-primary" style={{ width: '100%', marginBottom: 10 }}>
+            SafiScore ›
+          </Link>
           <Link to="/transactions" className="sp-btn sp-btn-ghost" style={{ width: '100%' }}>
             View Activity
           </Link>
